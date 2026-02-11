@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.HttpEntity;
 
 import java.util.*;
+
 @Service
 public class AiService {
 
@@ -19,14 +20,17 @@ public class AiService {
     public String ask(String question) {
 
         String url =
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="
                         + apiKey;
 
+
+        String strictPrompt =
+                question + ". Answer in ONE WORD only. No explanation. No punctuation.";
 
         Map<String, Object> body = new HashMap<>();
         body.put("contents", List.of(
                 Map.of("parts", List.of(
-                        Map.of("text", question)
+                        Map.of("text", strictPrompt)
                 ))
         ));
 
@@ -40,7 +44,8 @@ public class AiService {
                 restTemplate.postForObject(url, req, Map.class);
 
         String answer = extractText(response);
-        return answer.split("\\s+")[0];
+
+        return answer.replaceAll("[^A-Za-z]", "").trim();
     }
 
     private String extractText(Map response) {
